@@ -40,5 +40,7 @@ jobs:
         username: ${{ secrets.AZURE_VM_USER }}
         key: ${{ secrets.AZURE_VM_KEY }}
         script: |
-          pkill -f 'java -jar' || true
-          nohup java -jar ~/app/PatientManagement-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            pkill -f 'java -jar' || true
+            nohup java -jar ~/app/PatientManagement-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            sleep 5
+            tail -n 20 app.log
