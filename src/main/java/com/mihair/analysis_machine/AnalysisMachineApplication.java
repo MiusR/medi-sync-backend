@@ -17,6 +17,10 @@ public class AnalysisMachineApplication {
 	}
 
 
+	@GetMapping("/")
+	public String landing() {
+		return "Hello, World!";
+	}
 
 
 	@GetMapping("/add_patient")
