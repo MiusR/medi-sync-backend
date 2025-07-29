@@ -8,7 +8,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+		org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration.class
+})
 @Controller
 public class AnalysisMachineApplication {
 
