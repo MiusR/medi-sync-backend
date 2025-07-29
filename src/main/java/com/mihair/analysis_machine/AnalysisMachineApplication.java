@@ -1,5 +1,6 @@
 package com.mihair.analysis_machine;
 
+import com.azure.security.keyvault.keys.models.KeyVaultKey;
 import com.mihair.analysis_machine.util.KeyProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,9 +22,8 @@ public class AnalysisMachineApplication {
 	@GetMapping("/add_patient")
 	public String add_patient() {
 		KeyProvider keyProvider = new KeyProvider("patientkvault");
-		keyProvider.requestKey("test");
-
-		return "Done!";
+		KeyVaultKey key = keyProvider.requestKey("test");
+		return "Done! Here is your key sir: " + key.getKey().toString();
 	}
 
 }
