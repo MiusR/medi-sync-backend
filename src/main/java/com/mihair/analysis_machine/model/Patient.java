@@ -1,4 +1,4 @@
-package com.mihair.analysis_machine.model;
+/*package com.mihair.analysis_machine.model;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -78,3 +78,4 @@ public class Patient {
         return String.format("{ id = %s  name = %s  family-name = %s  room-number = %s  bed-number = %s  blood-type = %s  status = %s }",UID ,name ,familyName ,roomNumber ,bedNumber ,bloodType ,state.name());
     }
 }
+*/

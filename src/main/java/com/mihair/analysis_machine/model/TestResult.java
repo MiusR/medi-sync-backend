@@ -1,4 +1,4 @@
-package com.mihair.analysis_machine.model;
+/*package com.mihair.analysis_machine.model;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -61,3 +61,4 @@ public class TestResult {
         this.unit = unit;
     }
 }
+*/
