@@ -1,36 +1,48 @@
-package com.mihair.analysis_machine.util;
+package com.mihair.analysis_machine.util.keyutil;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.exception.ResourceNotFoundException;
 import com.azure.core.util.polling.PollResponse;
 import com.azure.core.util.polling.SyncPoller;
-import com.azure.identity.DefaultAzureCredentialBuilder;
-import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.security.keyvault.keys.KeyClient;
 import com.azure.security.keyvault.keys.KeyClientBuilder;
 import com.azure.security.keyvault.keys.models.CreateRsaKeyOptions;
 import com.azure.security.keyvault.keys.models.DeletedKey;
 import com.azure.security.keyvault.keys.models.KeyVaultKey;
+import com.mihair.analysis_machine.util.CredentialEnvProvider;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.HashMap;
+
 
 public class KeyProvider {
     private final KeyClient client;
+    private static final HashMap<KeyProviders, KeyProvider> singletonMap = new HashMap<>();
 
 
-// TODO : add local caching of keys with in memory encryption
-public KeyProvider(String vaultName) {
+    public static KeyProvider getInstance(KeyProviders provider) throws ProviderCreationException {
+        if(singletonMap.containsKey(provider)) {
+            return singletonMap.get(provider);
+        }else {
+            try {
+                singletonMap.put(provider, new KeyProvider(provider.vaultName));
+                return singletonMap.get(provider);
+            } catch (Exception e) {
+                throw new ProviderCreationException("Could not create key provider of type:" + provider.name());
+            }
+        }
+    }
+
+    private KeyProvider(String vaultName) throws Exception {
+        TokenCredential c = CredentialEnvProvider.getCredentials();
         client = new KeyClientBuilder()
-                .vaultUrl("https://" + vaultName + ".vault.azure.net/")
-                .credential(new ManagedIdentityCredentialBuilder().clientId(System.getenv("AZURE_CLIENT_ID")).build())
+                .vaultUrl("https://"+vaultName+".vault.azure.net/")
+                .credential(c)
                 .buildClient();
     }
 
     public KeyVaultKey requestKey(String alias) {
        try {
-           // Attempt fetch
-
            return client.getKey(alias);
        } catch (ResourceNotFoundException e ) {
            KeyVaultKey rsaKey = client.createRsaKey(new CreateRsaKeyOptions(alias)

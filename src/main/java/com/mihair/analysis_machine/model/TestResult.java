@@ -1,19 +1,23 @@
-/*package com.mihair.analysis_machine.model;
+package com.mihair.analysis_machine.model;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.time.Instant;
 import java.util.Date;
-@Document
+import java.util.Objects;
+
+@Entity
 public class TestResult {
     @Id
-    private ObjectId UID;
-    private ObjectId patientUID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long UID;
+    private Long patientUID;
     private String testName;
     private Date timeTaken;
-    private double value;
+    private Double value;
     private String unit;
 
 
@@ -22,11 +26,30 @@ public class TestResult {
         this.timeTaken = timeTaken;
         this.value = value;
         this.unit = unit;
-        this.UID = new ObjectId();
     }
 
     public TestResult(String testName, double value, String unit) {
         this(testName, Date.from(Instant.ofEpochSecond(System.currentTimeMillis())), value, unit);
+    }
+
+    public TestResult() {
+        this("New Test", 0D, "NO UNIT");
+    }
+
+    public Long getUID() {
+        return UID;
+    }
+
+    public void setUID(Long UID) {
+        this.UID = UID;
+    }
+
+    public Long getPatientUID() {
+        return patientUID;
+    }
+
+    public void setPatientUID(Long patientUID) {
+        this.patientUID = patientUID;
     }
 
     public String getTestName() {
@@ -45,11 +68,11 @@ public class TestResult {
         this.timeTaken = timeTaken;
     }
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
@@ -60,5 +83,29 @@ public class TestResult {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TestResult that = (TestResult) o;
+        return Objects.equals(UID, that.UID) && Objects.equals(patientUID, that.patientUID) && Objects.equals(testName, that.testName) && Objects.equals(timeTaken, that.timeTaken) && Objects.equals(value, that.value) && Objects.equals(unit, that.unit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(UID, patientUID, testName, timeTaken, value, unit);
+    }
+
+    @Override
+    public String toString() {
+        return "TestResult{" +
+                "UID=" + UID +
+                ", patientUID=" + patientUID +
+                ", testName='" + testName + '\'' +
+                ", timeTaken=" + timeTaken +
+                ", value=" + value +
+                ", unit='" + unit + '\'' +
+                '}';
+    }
 }
-*/
