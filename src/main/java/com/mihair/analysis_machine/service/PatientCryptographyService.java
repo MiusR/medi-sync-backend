@@ -39,7 +39,6 @@ public class PatientCryptographyService {
         }).getFirst();
     }
 
-    //TODO : review code
     public CryptographyClient getClientByKeyName(String keyName) throws CryptoClientCreationException {
         if (cryptoClientCache.containsKey(keyName) && Date.from(cryptoClientCache.get(keyName).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
             cryptoClientCache.remove(keyName);
