@@ -1,6 +1,6 @@
-package com.mihair.analysis_machine.model.DTO;
+package com.mihair.analysis_machine.model.patients.DTO;
 
-import com.mihair.analysis_machine.model.PatientStates;
+import com.mihair.analysis_machine.model.patients.PatientStates;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -11,6 +11,7 @@ public class PatientDTO {
     private String roomNumber, bedNumber;
     private String dateOfBirth;
     private String state;
+
 
     public PatientDTO(String name, String familyName, String roomNumber, String bedNumber, String dateOfBirth, String state) {
         this.name = name;

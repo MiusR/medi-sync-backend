@@ -1,6 +1,6 @@
-package com.mihair.analysis_machine.model;
+package com.mihair.analysis_machine.model.patients;
 
-import com.mihair.analysis_machine.model.DTO.PatientDTO;
+import com.mihair.analysis_machine.model.patients.DTO.PatientDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;

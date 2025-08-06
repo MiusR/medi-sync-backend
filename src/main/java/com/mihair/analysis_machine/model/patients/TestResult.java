@@ -1,4 +1,4 @@
-package com.mihair.analysis_machine.model;
+package com.mihair.analysis_machine.model.patients;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

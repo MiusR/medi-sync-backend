@@ -1,15 +1,13 @@
-package com.mihair.analysis_machine.model;
+package com.mihair.analysis_machine.model.patients;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
+@Table(name="active_patients_notes")
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

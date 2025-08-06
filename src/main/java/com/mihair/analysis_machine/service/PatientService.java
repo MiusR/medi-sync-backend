@@ -1,13 +1,13 @@
 package com.mihair.analysis_machine.service;
 
-import com.mihair.analysis_machine.model.DTO.PatientDTO;
-import com.mihair.analysis_machine.model.Patient;
+import com.mihair.analysis_machine.model.patients.DTO.PatientDTO;
+import com.mihair.analysis_machine.model.patients.Patient;
 import com.mihair.analysis_machine.repo.PatientRepository;
+import com.mihair.analysis_machine.service.exception.CryptoClientCreationException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.MissingResourceException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PatientService {
@@ -15,26 +15,33 @@ public class PatientService {
 
     private final PatientCryptographyService cryptographyService;
 
-
     public PatientService(PatientCryptographyService cryptographyService, PatientRepository patientRepository) {
         this.repo = patientRepository;
         this.cryptographyService = cryptographyService;
     }
 
-
     @Transactional
     public Patient createPatient(PatientDTO dto) {
         Patient saved = repo.save(new Patient(dto));
         String keyName = "patient-" + saved.getId();
-        cryptographyService.getClientByKeyName(keyName); // Generate and cache keyName
+        try {
+            cryptographyService.getClientOrCreateByKeyName(keyName); // Generate and cache keyName
+        } catch (Exception e) {
+            repo.delete(saved);  // Remove created patient and abort
+            throw new CryptoClientCreationException(e.getMessage());
+        }
         return saved;
     }
 
-    public Patient getPatient(Long id) throws MissingResourceException {
-        Optional<Patient> patient = repo.findById(id);
-        if(patient.isEmpty())
-            throw new MissingResourceException("Could not find patient. Maybe they were deleted!", Patient.class.getName(), id.toString());
-        return patient.get();
+    public List<PatientDTO> getPatients(){
+        ArrayList<PatientDTO> patients = new ArrayList<>();
+        repo.findAll().forEach(patient -> patients.add(new PatientDTO(patient.getName(),patient.getFamilyName(),patient.getRoomNumber(),patient.getBedNumber(), patient.getDateOfBirth().toString(), patient.getState().toString())));
+        return patients;
+    }
+
+
+    public Optional<Patient> getPatient(Long id) {
+        return repo.findById(id);
     }
 
 

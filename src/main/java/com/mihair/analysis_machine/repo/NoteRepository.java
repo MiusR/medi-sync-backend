@@ -1,19 +1,12 @@
 package com.mihair.analysis_machine.repo;
-/*
-import com.mihair.analysis_machine.model.Note;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.repository.MongoRepository;
+
+import com.mihair.analysis_machine.model.patients.Note;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Date;
 import java.util.List;
 
-public interface NoteRepository extends MongoRepository<Note, ObjectId> {
-    public Note findByPatientId(ObjectId id);
-    public List<Note> findByTimeInterval(Date begin, Date end);
-}
- */
-
-
-public class NoteRepository {
-
+public interface NoteRepository extends JpaRepository<Note, Long> {
+    public Note findByPatientUID(Long patientUID);
+    public List<Note> findByTimeTaken(Date timeTaken);
 }

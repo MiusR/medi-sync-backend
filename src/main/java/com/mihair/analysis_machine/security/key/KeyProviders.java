@@ -1,7 +1,8 @@
-package com.mihair.analysis_machine.util.keyutil;
+package com.mihair.analysis_machine.security.key;
 
 public enum KeyProviders {
-    PATIENT("patientkvault");
+    PATIENT("patientkvault"),
+    API_TRANSMISSION("hospital-api-keys");
 
     public final String vaultName;
 
