@@ -1,118 +1,120 @@
 package com.mihair.analysis_machine.service;
 
-import com.azure.security.keyvault.keys.cryptography.CryptographyClient;
-import com.azure.security.keyvault.keys.cryptography.CryptographyClientBuilder;
-import com.azure.security.keyvault.keys.cryptography.models.EncryptResult;
-import com.azure.security.keyvault.keys.models.KeyVaultKey;
+import com.azure.security.keyvault.secrets.models.KeyVaultSecret;
+import com.mihair.analysis_machine.security.secret.SecretProvider;
+import com.mihair.analysis_machine.security.secret.SecretProviders;
 import com.mihair.analysis_machine.service.exception.CryptoClientCreationException;
-import com.mihair.analysis_machine.security.cred.CredentialEnvProvider;
-import com.mihair.analysis_machine.security.key.KeyProvider;
-import com.mihair.analysis_machine.security.key.KeyProviders;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class PatientCryptographyService {
     //TODO : read from a config file, do not set it up with hardcoded value
     private final static Integer CACHE_INVALIDATION_SECONDS = 60 * 10;
-    private final Map<String, Pair<CryptographyClient, Date>> cryptoClientCache = new ConcurrentHashMap<>();
+    private final Map<String, Pair<KeyVaultSecret, Date>> secretCache = new ConcurrentHashMap<>();
 
-    public CryptographyClient getClientOrCreateByKeyName(String keyName) throws CryptoClientCreationException {
-        if (cryptoClientCache.containsKey(keyName) && Date.from(cryptoClientCache.get(keyName).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
-            cryptoClientCache.remove(keyName);
+    public KeyVaultSecret getSecretOrCreateByName(String keyName) throws CryptoClientCreationException {
+        if (secretCache.containsKey(keyName) && Date.from(secretCache.get(keyName).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
+            secretCache.remove(keyName);
 
-        return cryptoClientCache.computeIfAbsent(keyName, name -> {
-            KeyVaultKey key = KeyProvider.getInstance(KeyProviders.PATIENT).getKeyOrCreate(name); // gets latest version
+        return secretCache.computeIfAbsent(keyName, name -> {
+            KeyVaultSecret key = SecretProvider.getInstance(SecretProviders.PATIENT_SECRETS).getSecretOrCreate(name); // gets latest version
             try {
-                return Pair.of(createCryptoClient(key.getId()), Date.from(Instant.ofEpochMilli(System.currentTimeMillis())));
+                return Pair.of(key, Date.from(Instant.ofEpochMilli(System.currentTimeMillis())));
             } catch (Exception e) {
                 throw new CryptoClientCreationException(e.getMessage());
             }
         }).getFirst();
     }
 
-    public CryptographyClient getClientByKeyName(String keyName) throws CryptoClientCreationException {
-        if (cryptoClientCache.containsKey(keyName) && Date.from(cryptoClientCache.get(keyName).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
-            cryptoClientCache.remove(keyName);
+    public KeyVaultSecret getSecretByName(String keyName) throws CryptoClientCreationException {
+        if (secretCache.containsKey(keyName) && Date.from(secretCache.get(keyName).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
+            secretCache.remove(keyName);
 
-        Optional<KeyVaultKey> key = KeyProvider.getInstance(KeyProviders.PATIENT).getKey(keyName);
+        Optional<KeyVaultSecret> key = SecretProvider.getInstance(SecretProviders.PATIENT_SECRETS).getSecret(keyName);
         if(key.isPresent()) {
             try {
-                cryptoClientCache.put(keyName, Pair.of(createCryptoClient(key.get().getId()), Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))));
+                secretCache.put(keyName, Pair.of(key.get(), Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))));
             } catch (Exception e) {
                 throw new CryptoClientCreationException(e.getMessage());
             }
-            return cryptoClientCache.get(keyName).getFirst();
+            return secretCache.get(keyName).getFirst();
         }
         return null;
     }
 
 
 
-    public void forgetClient(String keyName) {
-        cryptoClientCache.remove(keyName);
+    public void forgetSecret(String keyName) {
+        secretCache.remove(keyName);
 
-        KeyProvider.getInstance(KeyProviders.PATIENT).forgetKey(keyName);
+        SecretProvider.getInstance(SecretProviders.PATIENT_SECRETS).forgetSecret(keyName);
+    }
+
+    public byte[] encrypt(String plainText, String keyName) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        String keyBase64 = getSecretByName(keyName).getValue();
+        if (keyBase64 == null) {
+            throw new RuntimeException("Could not find key!"); // Abort if no key found
+        }
+        byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
+
+        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+
+        // IV
+        byte[] iv = new byte[12];
+        new SecureRandom().nextBytes(iv);
+
+        // why does this default to ECB?
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmSpec);
+
+        byte[] cipherText = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+
+        // prepend initial vector
+        byte[] combined = new byte[iv.length + cipherText.length];
+        System.arraycopy(iv, 0, combined, 0, iv.length);
+        System.arraycopy(cipherText, 0, combined, iv.length, cipherText.length);
+
+        return combined;
     }
 
 
-    public CryptographyClient getClientByKeyId(String keyId) throws CryptoClientCreationException{
-        if (cryptoClientCache.containsKey(keyId) && Date.from(cryptoClientCache.get(keyId).getSecond().toInstant().plusSeconds(CACHE_INVALIDATION_SECONDS)).before(Date.from(Instant.ofEpochMilli(System.currentTimeMillis()))))
-            cryptoClientCache.remove(keyId);
+    public byte[] decrypt(byte[] encryptedText, String keyName) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        // Fetch key and decode from Base64
+        String keyBase64 = getSecretByName(keyName).getValue();
+        if (keyBase64 == null) {
+            throw new RuntimeException("Could not find key!");
+        }
+        byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
 
-        return cryptoClientCache.computeIfAbsent(keyId,  name -> {
-            try {
-                return Pair.of(createCryptoClient(name), Date.from(Instant.ofEpochMilli(System.currentTimeMillis())));
-            } catch (Exception e) {
-                throw new CryptoClientCreationException(e.getMessage());
-            }
-        }).getFirst();
-    }
+        // Decode Base64
+        byte[] combined = encryptedText;
+        // Extract IV and ciphertext
+        byte[] iv = Arrays.copyOfRange(combined, 0, 12);
+        byte[] cipherText = Arrays.copyOfRange(combined, 12, combined.length);
 
-    private CryptographyClient createCryptoClient(String keyId) throws Exception {
-        return new CryptographyClientBuilder()
-                .keyIdentifier(keyId)
-                .credential(CredentialEnvProvider.getCredentials())
-                .buildClient();
-    }
+        // Decrypt
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, gcmSpec);
 
-    public String encrypt(String plainText, String keyName) {
-        CryptographyClient client = getClientByKeyName(keyName);
-
-        if (client == null)
-            return null; // Abort encryption
-
-
-        EncryptResult result = client.encrypt(
-                com.azure.security.keyvault.keys.cryptography.models.EncryptionAlgorithm.RSA_OAEP,
-                plainText.getBytes(StandardCharsets.UTF_8)
-        );
-
-        return Base64.getEncoder().encodeToString(result.getCipherText());
-    }
-
-
-    public String decrypt(String cipherTextBase64, String keyName) {
-        CryptographyClient client = getClientByKeyId(keyName);
-
-        if (client == null)
-            return null; // Aborted decryption
-
-        byte[] cipherText = Base64.getDecoder().decode(cipherTextBase64);
-
-        var result = client.decrypt(
-                com.azure.security.keyvault.keys.cryptography.models.EncryptionAlgorithm.RSA_OAEP,
-                cipherText
-        );
-
-        return new String(result.getPlainText());
+        return cipher.doFinal(cipherText);
     }
 }

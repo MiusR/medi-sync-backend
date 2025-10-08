@@ -11,18 +11,31 @@ public class PatientDTO {
     private String roomNumber, bedNumber;
     private String dateOfBirth;
     private String state;
+    private String email;
+    private String phoneNumber;
 
 
-    public PatientDTO(String name, String familyName, String roomNumber, String bedNumber, String dateOfBirth, String state) {
+    public PatientDTO(String name, String familyName, String roomNumber, String bedNumber, String dateOfBirth, String state, String phoneNumber, String email) {
         this.name = name;
         this.familyName = familyName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
 
-        // Incomplete data sanitization
-        if (name == null || name.isEmpty()) {
-            this.name = "John";
-            if (familyName == null || familyName.isEmpty())
-                this.familyName = "Doe";
+
+        // Required fields
+        if (name == null || name.isEmpty() || familyName == null || familyName.isEmpty()) {
+            throw new ModelValidationException("Name and family name can NOT be empty fields.");
         }
+
+        if( email == null || email.isEmpty() || phoneNumber == null || phoneNumber.isEmpty()) {
+            throw new ModelValidationException("Email and phone number can NOT be empty fields.");
+        }
+
+        if(!email.contains("@") || !email.contains("."))
+            throw new ModelValidationException("Email does not follow usual rules!");
+
+        if(!phoneNumber.matches("[0-9]"))
+            throw new ModelValidationException("Phone number can only contain numbers.");
 
         // Incomplete or missing room/bed number sanitation
         this.roomNumber = roomNumber;
@@ -79,5 +92,21 @@ public class PatientDTO {
 
     public String getState() {
         return state;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

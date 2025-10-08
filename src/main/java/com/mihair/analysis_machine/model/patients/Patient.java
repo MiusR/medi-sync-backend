@@ -12,7 +12,7 @@ import java.util.Objects;
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long UID;
     private String name;
     private String familyName;
     private String roomNumber;
@@ -21,10 +21,12 @@ public class Patient {
     private LocalDate dateOfBirth;
     @Enumerated(EnumType.STRING)
     private PatientStates state;
+    private String email;
+    private String phoneNumber;
 
 
-    public Patient(String name, String familyName, LocalDate dateOfBirth, String roomNumber, String bedNumber, PatientStates state){
-        this(new PatientDTO(name,familyName,roomNumber, bedNumber,dateOfBirth.toString(), state.name()));
+    public Patient(String name, String familyName, LocalDate dateOfBirth, String roomNumber, String bedNumber, PatientStates state, String phoneNumber, String email){
+        this(new PatientDTO(name,familyName,roomNumber, bedNumber,dateOfBirth.toString(), state.name(), phoneNumber, email));
     }
 
     public Patient(PatientDTO dto) {
@@ -40,18 +42,21 @@ public class Patient {
         this.roomNumber = dto.getRoomNumber();
 
         this.state = PatientStates.valueOf(dto.getState());
+
+        this.email = dto.getEmail();
+        this.phoneNumber = dto.getPhoneNumber();
     }
 
     public Patient() {
 
     }
 
-    public Long getId() {
-        return id;
+    public Long getUID() {
+        return UID;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUID(Long id) {
+        this.UID = id;
     }
 
     public String getName() {
@@ -102,29 +107,20 @@ public class Patient {
         this.state = state;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Patient patient = (Patient) o;
-        return Objects.equals(id, patient.id) && Objects.equals(name, patient.name) && Objects.equals(familyName, patient.familyName) && Objects.equals(roomNumber, patient.roomNumber) && Objects.equals(bedNumber, patient.bedNumber) && Objects.equals(dateOfBirth, patient.dateOfBirth) && state == patient.state;
+
+    public String getEmail() {
+        return email;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, familyName, roomNumber, bedNumber, dateOfBirth, state);
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    @Override
-    public String toString() {
-        return "Patient{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", roomNumber='" + roomNumber + '\'' +
-                ", bedNumber='" + bedNumber + '\'' +
-                ", dateOfBirth=" + dateOfBirth +
-                ", state=" + state +
-                '}';
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
