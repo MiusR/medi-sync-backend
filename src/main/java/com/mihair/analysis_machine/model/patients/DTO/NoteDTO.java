@@ -5,12 +5,14 @@ import java.util.Date;
 public class NoteDTO {
     private Long patientUID;
     private Date timeTaken;
-    private String infoENC;
+    private String title;
+    private String info;
 
-    public NoteDTO(Long patientUID, Date timeTaken, String infoENC) {
+    public NoteDTO(Long patientUID, Date timeTaken, String title, String info) {
         this.patientUID = patientUID;
         this.timeTaken = timeTaken;
-        this.infoENC = infoENC;
+        this.title = title;
+        this.info = info;
     }
 
     public Long getPatientUID() {
@@ -29,11 +31,19 @@ public class NoteDTO {
         this.timeTaken = timeTaken;
     }
 
-    public String getInfoENC() {
-        return infoENC;
+    public String getInfo() {
+        return info;
     }
 
-    public void setInfoENC(String infoENC) {
-        this.infoENC = infoENC;
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

@@ -7,6 +7,6 @@ import java.util.Date;
 import java.util.List;
 
 public interface NoteRepository extends JpaRepository<Note, Long> {
-    public Note findByPatientUID(Long patientUID);
     public List<Note> findByTimeTaken(Date timeTaken);
+    public List<Note> getAllByPatientUID(Long UID);
 }
