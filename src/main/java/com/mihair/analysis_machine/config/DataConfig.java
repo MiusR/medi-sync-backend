@@ -18,7 +18,7 @@ public class DataConfig {
         dataSource.setUrl(
                 "jdbc:postgresql://localhost:5432/medi-sync-patients");
         dataSource.setUsername("postgres");
-        dataSource.setPassword("#OdpHb202(}j");
+            dataSource.setPassword("#OdpHb202(}j");
         return dataSource;
     }
 }

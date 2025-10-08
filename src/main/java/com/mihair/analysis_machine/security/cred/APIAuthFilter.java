@@ -19,17 +19,20 @@ public class APIAuthFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+
         try {
             Authentication authentication = AuthenticationService.getAuthentication((HttpServletRequest) servletRequest);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
-            HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            PrintWriter writer = httpServletResponse.getWriter();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            PrintWriter writer = response.getWriter();
             writer.print(e.getMessage());
             writer.flush();
             writer.close();
+            return;
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
