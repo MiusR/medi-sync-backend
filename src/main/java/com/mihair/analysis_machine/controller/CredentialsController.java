@@ -12,7 +12,7 @@ import java.util.Optional;
 @RestController("/api/auth")
 public class CredentialsController {
 
-    private UserService service;
+    private final UserService service;
 
     public CredentialsController(UserService service) {
         this.service = service;
