@@ -12,6 +12,10 @@ import com.azure.security.keyvault.secrets.models.KeyVaultSecret;
 import com.mihair.analysis_machine.security.cred.CredentialEnvProvider;
 import com.mihair.analysis_machine.security.key.ProviderCreationException;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -41,6 +45,11 @@ public class SecretProvider {
                 .buildClient();
     }
 
+    // Secret client can work with multiple
+    public SecretClient getClient() {
+        return client;
+    }
+
     public Optional<KeyVaultSecret> getSecret(String alias) {
         try {
             return Optional.of(client.getSecret(alias));
@@ -52,5 +61,22 @@ public class SecretProvider {
     public PollResponse<DeletedSecret> forgetSecret(String alias) {
         SyncPoller<DeletedSecret, Void> deletedKeyPoller = client.beginDeleteSecret(alias);
         return deletedKeyPoller.poll();
+    }
+
+    public KeyVaultSecret getSecretOrCreate(String name) {
+        try {
+            return client.getSecret(name);
+        } catch (ResourceNotFoundException e) {
+            try {
+                KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+                keyGenerator.init(256); // magic value for size?
+                SecretKey key = keyGenerator.generateKey();
+                String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
+                return client.setSecret(new KeyVaultSecret(name, encodedKey));
+
+            } catch (NoSuchAlgorithmException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 }

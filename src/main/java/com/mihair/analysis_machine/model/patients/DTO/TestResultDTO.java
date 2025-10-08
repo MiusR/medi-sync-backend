@@ -6,10 +6,10 @@ public class TestResultDTO {
     private Long patientUID;
     private String testName;
     private Date timeTaken;
-    private Double value;
+    private String value;
     private String unit;
 
-    public TestResultDTO(Long patientUID, String testName, Date timeTaken, Double value, String unit) {
+    public TestResultDTO(Long patientUID, String testName, Date timeTaken, String value, String unit) {
         this.patientUID = patientUID;
         this.testName = testName;
         this.timeTaken = timeTaken;
@@ -41,11 +41,11 @@ public class TestResultDTO {
         this.timeTaken = timeTaken;
     }
 
-    public Double getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

@@ -1,9 +1,6 @@
 package com.mihair.analysis_machine.model.patients;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.Date;
@@ -15,25 +12,32 @@ public class TestResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long UID;
     private Long patientUID;
-    private String testName;
+    @Lob
+    @Basic(fetch = FetchType.EAGER)
+    private byte[] testName;
     private Date timeTaken;
-    private Double value;
-    private String unit;
+    @Lob
+    @Basic(fetch = FetchType.EAGER)
+    private byte[] value;
+    @Lob
+    @Basic(fetch = FetchType.EAGER)
+    private byte[] unit;
 
 
-    public TestResult(String testName, Date timeTaken, double value, String unit) {
+    public TestResult(Long patientUID, byte[] testName, Date timeTaken, byte[] value, byte[] unit) {
+        this.patientUID = patientUID;
         this.testName = testName;
         this.timeTaken = timeTaken;
         this.value = value;
         this.unit = unit;
     }
 
-    public TestResult(String testName, double value, String unit) {
-        this(testName, Date.from(Instant.ofEpochSecond(System.currentTimeMillis())), value, unit);
+    public TestResult(Long patientUID, byte[] testName, byte[] value, byte[] unit) {
+        this(patientUID, testName, Date.from(Instant.ofEpochSecond(System.currentTimeMillis())), value, unit);
     }
 
     public TestResult() {
-        this("New Test", 0D, "NO UNIT");
+
     }
 
     public Long getUID() {
@@ -52,11 +56,11 @@ public class TestResult {
         this.patientUID = patientUID;
     }
 
-    public String getTestName() {
+    public byte[] getTestName() {
         return testName;
     }
 
-    public void setTestName(String testName) {
+    public void setTestName(byte[] testName) {
         this.testName = testName;
     }
 
@@ -68,19 +72,19 @@ public class TestResult {
         this.timeTaken = timeTaken;
     }
 
-    public Double getValue() {
+    public byte[] getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(byte[] value) {
         this.value = value;
     }
 
-    public String getUnit() {
+    public byte[] getUnit() {
         return unit;
     }
 
-    public void setUnit(String unit) {
+    public void setUnit(byte[] unit) {
         this.unit = unit;
     }
 
