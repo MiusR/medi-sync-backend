@@ -8,7 +8,8 @@ import com.mihair.analysis_machine.service.exception.PatientCreationException;
 import com.mihair.analysis_machine.service.exception.PatientModificationException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PatientService {

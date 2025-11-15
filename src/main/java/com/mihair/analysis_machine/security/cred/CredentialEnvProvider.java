@@ -1,7 +1,8 @@
 package com.mihair.analysis_machine.security.cred;
 
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.*;
+import com.azure.identity.ClientSecretCredentialBuilder;
+import com.azure.identity.ManagedIdentityCredentialBuilder;
 
 public class CredentialEnvProvider {
 

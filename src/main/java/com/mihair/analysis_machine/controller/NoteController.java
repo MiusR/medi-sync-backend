@@ -1,6 +1,5 @@
 package com.mihair.analysis_machine.controller;
 
-import com.mihair.analysis_machine.config.CORSConfig;
 import com.mihair.analysis_machine.model.patients.DTO.NoteDTO;
 import com.mihair.analysis_machine.model.patients.Note;
 import com.mihair.analysis_machine.service.NoteService;
@@ -10,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static com.mihair.analysis_machine.config.CORSConfig.CORS_ALLOWED_IPS;
 
 @RestController
 @RequestMapping("/api/notes")

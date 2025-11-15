@@ -4,7 +4,6 @@ import com.mihair.analysis_machine.model.patients.DTO.PatientDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 // Model of Patient
 @Entity

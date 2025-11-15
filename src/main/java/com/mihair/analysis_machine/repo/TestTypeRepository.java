@@ -1,6 +1,5 @@
 package com.mihair.analysis_machine.repo;
 
-import com.mihair.analysis_machine.model.patients.Note;
 import com.mihair.analysis_machine.model.util.TestType;
 import org.springframework.data.jpa.repository.JpaRepository;
 

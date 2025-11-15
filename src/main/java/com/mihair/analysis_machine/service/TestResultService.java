@@ -1,7 +1,6 @@
 package com.mihair.analysis_machine.service;
 
 import com.mihair.analysis_machine.model.patients.DTO.TestResultDTO;
-import com.mihair.analysis_machine.model.patients.Note;
 import com.mihair.analysis_machine.model.patients.TestResult;
 import com.mihair.analysis_machine.repo.TestResultRepository;
 import jakarta.annotation.Nonnull;
