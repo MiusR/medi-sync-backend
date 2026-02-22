@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DataConfig {
 
+    // FIXME : load credentials from env or from secret vault.... I shouldn't need to mention that they must be changed if ever going into production :/
     @Bean
     public DataSource dataSource()
     {
@@ -17,8 +18,6 @@ public class DataConfig {
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setUrl(
                 "jdbc:postgresql://localhost:5432/medi-sync-patients");
-        dataSource.setUsername("postgres");
-            dataSource.setPassword("#OdpHb202(}j");
         return dataSource;
     }
 }
